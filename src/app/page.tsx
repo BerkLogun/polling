@@ -16,51 +16,63 @@ export default function Home() {
   const [featuredPoll, setFeaturedPoll] = useState<Poll | null>(null)
 
   useEffect(() => {
-    fetchPopularPolls()
-    fetchFeaturedPoll()
+    getMainPolls();
   }, [])
 
-  async function fetchPopularPolls() {
-    const { data, error } = await supabase
-      .from('polls')
-      .select('*, vote_count:vote_records(count)')
-      .order('vote_count', { ascending: false })
-      .limit(3)
+  // async function fetchPopularPolls() {
+  //   const { data, error } = await supabase
+  //     .from('polls')
+  //     .select('*, vote_count:vote_records(count)')
+  //     .order('vote_count', { ascending: false })
+  //     .limit(3)
     
-    if (error) {
-      console.log('Error fetching popular polls:', error)
-    } else {
-      setPolls(data)
-    }
-  }
+  //   if (error) {
+  //     console.log('Error fetching popular polls:', error)
+  //   } else {
+  //     setPolls(data)
+  //   }
+  // }
 
-  async function fetchFeaturedPoll() {
-    const { data, error } = await supabase
-      .from('polls')
-      .select('*')
-      .eq('featured', true)
-      .limit(1)
-      .single()
+  // async function fetchFeaturedPoll() {
+  //   const { data, error } = await supabase
+  //     .from('polls')
+  //     .select('*')
+  //     .eq('featured', true)
+  //     .limit(1)
+  //     .single()
   
-    if (error) {
-      console.log('Error fetching featured poll:', error)
-    } else if (data) {
-      setFeaturedPoll(data)
-    } else {
-      console.log('No featured poll found.')
-    }
-  }
+  //   if (error) {
+  //     console.log('Error fetching featured poll:', error)
+  //   } else if (data) {
+  //     setFeaturedPoll(data)
+  //   } else {
+  //     console.log('No featured poll found.')
+  //   }
+  // }
 
+  const getMainPolls = async () => {
+    try {
+
+        const res = await fetch(`/api/get-main`);
+        const data = await res.json();
+        setFeaturedPoll(data.featuredPoll);
+        setPolls(data.popularPolls);
+
+    } catch (error) {
+    console.error('Error fetching poll:', error)
+    return
+    }
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-extrabold text-center text-indigo-900 mb-12">
-          Welcome to PollMaster
+          Secemiyosan Ne Yapıyosun?
         </h1>
         
         <div className="flex justify-center mb-12">
           <Link href="/create-poll" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-            Create New Poll
+            BASKALARINA SOR
             <ArrowRight className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
           </Link>
         </div>

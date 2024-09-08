@@ -27,37 +27,50 @@ export default function PollDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchPollAndOptions()
+        getPollData(id);
     }
   }, [id])
 
-  async function fetchPollAndOptions() {
-    const { data: pollData, error: pollError } = await supabase
-      .from('polls')
-      .select('*')
-      .eq('id', id)
-      .single()
+//   async function fetchPollAndOptions() {
+//     const { data: pollData, error: pollError } = await supabase
+//       .from('polls')
+//       .select('*')
+//       .eq('id', id)
+//       .single()
 
-    if (pollError) {
-      console.error('Error fetching poll:', pollError)
-      return
+//     if (pollError) {
+//       console.error('Error fetching poll:', pollError)
+//       return
+//     }
+
+//     setPoll(pollData)
+
+//     const { data: optionsData, error: optionsError } = await supabase
+//       .from('options')
+//       .select('*')
+//       .eq('poll_id', id)
+//       .order('votes', { ascending: false })
+
+//     if (optionsError) {
+//       console.error('Error fetching options:', optionsError)
+//       return
+//     }
+
+//     setOptions(optionsData)
+//   }
+    const getPollData = async (id) => {
+        try {
+
+            const res = await fetch(`/api/get-poll/${id}`);
+            const data = await res.json();
+            setOptions(data.options);
+            setPoll(data.poll);
+
+        } catch (error) {
+        console.error('Error fetching poll:', error)
+        return
+        }
     }
-
-    setPoll(pollData)
-
-    const { data: optionsData, error: optionsError } = await supabase
-      .from('options')
-      .select('*')
-      .eq('poll_id', id)
-      .order('votes', { ascending: false })
-
-    if (optionsError) {
-      console.error('Error fetching options:', optionsError)
-      return
-    }
-
-    setOptions(optionsData)
-  }
 
   const handleVote = async () => {
     if (!selectedOption || isVoting) return
@@ -82,7 +95,8 @@ export default function PollDetail() {
 
       if (response.ok) {
         setVoteMessage(data.message)
-        fetchPollAndOptions() // Refresh the poll data
+        // fetchPollAndOptions() // Refresh the poll data
+        getPollData(id);
       } else {
         setVoteMessage(data.message)
       }

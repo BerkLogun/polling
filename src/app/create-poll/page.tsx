@@ -1,58 +1,50 @@
 "use client";
-import { useState } from 'react'
-import { supabase } from '../../utils/supabase-client'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CreatePoll() {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [options, setOptions] = useState(['', ''])
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [options, setOptions] = useState(['', '']);
   const router = useRouter();
 
   const handleOptionChange = (index, value) => {
-    const newOptions = [...options]
-    newOptions[index] = value
-    setOptions(newOptions)
+    const newOptions = [...options];
+    newOptions[index] = value;
+    setOptions(newOptions);
   };
   
   const addOption = () => {
-    setOptions([...options, ''])
-  }
+    setOptions([...options, '']);
+  };
 
   const removeOption = (index) => {
-    const newOptions = options.filter((_, i) => i !== index)
-    setOptions(newOptions)
-  }
+    const newOptions = options.filter((_, i) => i !== index);
+    setOptions(newOptions);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     
-    const { data: poll, error: pollError } = await supabase
-      .from('polls')
-      .insert({ title, description })
-      .select('*')
-      .single()
+    const response = await fetch('/api/create-poll', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        options,
+      }),
+    });
 
-    if (pollError) {
-      console.error('Error creating poll:', pollError)
-      return
+    if (response.ok) {
+      const data = await response.json();
+      router.push(`/poll/${data.poll.id}`);
+    } else {
+      console.error('Error creating poll:', response.statusText);
     }
-
-    const optionsToInsert = options
-      .filter(option => option.trim() !== '')
-      .map(option => ({ poll_id: poll.id, text: option }))
-
-    const { error: optionsError } = await supabase
-      .from('options')
-      .insert(optionsToInsert)
-
-    if (optionsError) {
-      console.error('Error creating options:', optionsError)
-      return
-    }
-
-    router.push(`/poll/${poll.id}`)
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -111,7 +103,5 @@ export default function CreatePoll() {
         </button>
       </form>
     </div>
-  )
-
-
+  );
 }
